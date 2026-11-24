@@ -1,0 +1,124 @@
+﻿@use "vendor/bootstrap";
+@use "base/base";
+@use "layout/app-shell";
+@use "components/kpi-card";
+@use "components/status-badge";
+@use "components/data-table";
+
+.welcome-section {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 24px;
+
+  h2 {
+    margin-bottom: 5px;
+    font-size: 23px;
+    font-weight: 750;
+  }
+
+  p {
+    margin: 0;
+    color: var(--bs-secondary-color);
+    font-size: 14px;
+  }
+}
+
+.kpi-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 18px;
+  margin-bottom: 28px;
+}
+
+.inventory-panel {
+  overflow: hidden;
+  border: 1px solid var(--bs-border-color);
+  border-radius: var(--bs-border-radius-lg);
+  background: var(--bs-body-bg);
+  box-shadow: var(--bs-box-shadow-sm);
+
+  &__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 22px 20px;
+
+    h2 {
+      margin-bottom: 5px;
+      font-size: 17px;
+      font-weight: 700;
+    }
+
+    p {
+      margin: 0;
+      color: var(--bs-secondary-color);
+      font-size: 12px;
+    }
+  }
+}
+
+.inventory-count {
+  padding: 6px 10px;
+  border-radius: 50rem;
+  color: var(--bs-primary);
+  background: var(--bs-primary-bg-subtle);
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+}
+
+.empty-state {
+  padding: 35px 15px;
+  color: var(--bs-secondary-color);
+  text-align: center;
+}
+
+.page-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 25px;
+  color: var(--bs-secondary-color);
+  font-size: 12px;
+}
+
+@media (width <= 1100px) {
+  .kpi-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (width <= 575.98px) {
+  .welcome-section {
+    align-items: flex-start;
+    flex-direction: column;
+
+    h2 {
+      font-size: 20px;
+    }
+  }
+
+  .kpi-grid {
+    gap: 12px;
+  }
+
+  .kpi-card {
+    padding: 14px;
+  }
+
+  .kpi-card__value {
+    font-size: 25px;
+  }
+
+  .inventory-panel__header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .page-footer {
+    flex-direction: column;
+  }
+}

@@ -1,0 +1,31 @@
+﻿@use "../abstracts" as *;
+
+%pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border-radius: 50rem;
+  font-size: 12px;
+  font-weight: 600;
+  white-space: nowrap;
+
+  &::before {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: currentcolor;
+    content: "";
+  }
+}
+
+.status-badge {
+  @extend %pill;
+
+  @each $state, $theme in $stock-states {
+    &--#{$state} {
+      color: var(--bs-#{$theme}-text-emphasis);
+      background: var(--bs-#{$theme}-bg-subtle);
+    }
+  }
+}

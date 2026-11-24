@@ -1,13 +1,312 @@
+﻿
 <!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>stocklab</title>
-  </head>
-  <body>
-    <div id="app"></div>
-    <script type="module" src="/src/main.js"></script>
-  </body>
+<html lang="es" data-bs-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="StockLab - Panel de control de inventario">
+  <title>StockLab | Inventario</title>
+
+  <!-- Configuración inicial del tema -->
+  <script>
+    (() => {
+      const saved = localStorage.getItem('stocklab-theme');
+      const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches;
+      document.documentElement.dataset.bsTheme = saved || (preferred ? 'dark' : 'light');
+    })();
+  </script>
+</head>
+<body>
+
+  <!-- Enlace para accesibilidad -->
+  <a class="skip-link" href="#main-content">Saltar al contenido</a>
+
+  <div class="app-shell">
+
+    <!-- Menú lateral -->
+    <aside class="sidebar offcanvas-lg offcanvas-start" tabindex="-1" id="sidebar">
+      <div class="sidebar__brand">
+        <span class="brand-mark">S</span>
+        <span>StockLab</span>
+        <button class="btn-close d-lg-none ms-auto" type="button" data-bs-dismiss="offcanvas" aria-label="Cerrar menú"></button>
+      </div>
+
+      <div class="sidebar__section">MENÚ PRINCIPAL</div>
+
+      <!-- Opciones de navegación -->
+      <nav class="sidebar__nav" aria-label="Navegación principal">
+        <a class="sidebar__link" href="#dashboard" aria-current="page">
+          <span>▦</span> Panel principal
+        </a>
+        <a class="sidebar__link" href="#inventory">
+          <span>▤</span> Inventario
+        </a>
+        <a class="sidebar__link" href="#inventory">
+          <span>◷</span> Movimientos
+        </a>
+        <a class="sidebar__link" href="#inventory">
+          <span>▧</span> Categorías
+        </a>
+      </nav>
+
+      <div class="sidebar__section">SISTEMA</div>
+
+      <nav class="sidebar__nav" aria-label="Opciones del sistema">
+        <a class="sidebar__link" href="#settings">
+          <span>⚙</span> Configuración
+        </a>
+      </nav>
+
+      <!-- Información del usuario -->
+      <div class="sidebar__footer">
+        <div class="user-avatar">AD</div>
+        <div>
+          <strong>Administrador</strong>
+          <small>Control de inventario</small>
+        </div>
+      </div>
+    </aside>
+
+    <div class="app-main">
+
+      <!-- Barra superior -->
+      <header class="topbar">
+        <div class="d-flex align-items-center gap-3">
+          <button class="btn btn-outline-secondary d-lg-none" type="button"
+            data-bs-toggle="offcanvas" data-bs-target="#sidebar"
+            aria-controls="sidebar" aria-label="Abrir menú">☰</button>
+          <div>
+            <div class="topbar__eyebrow">GESTIÓN DE INVENTARIO</div>
+            <h1 class="topbar__title">Panel principal</h1>
+          </div>
+        </div>
+
+        <!-- Buscador y cambio de tema -->
+        <div class="topbar__actions">
+          <label class="search-box">
+            <span aria-hidden="true">⌕</span>
+            <input id="searchInput" type="search" placeholder="Buscar producto..." aria-label="Buscar producto">
+          </label>
+          <button class="btn btn-outline-secondary theme-toggle" id="themeToggle"
+            type="button" aria-label="Cambiar tema" aria-pressed="false">
+            <span id="themeIcon" aria-hidden="true">☾</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- Contenido principal -->
+      <main class="main-content" id="main-content">
+
+        <!-- Resumen del inventario -->
+        <section class="welcome-section" id="dashboard">
+          <div>
+            <h2>Resumen general</h2>
+            <p>Consulta el estado actual de tu inventario.</p>
+          </div>
+          <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#productModal">
+            <span aria-hidden="true">＋</span> Agregar producto
+          </button>
+        </section>
+
+        <!-- Tarjetas de estadísticas -->
+        <section class="kpi-grid" aria-label="Estadísticas del inventario">
+          <article class="kpi-card kpi-card--primary">
+            <div class="kpi-card__top">
+              <span class="kpi-card__label">Total de productos</span>
+              <span class="kpi-icon">▤</span>
+            </div>
+            <div class="kpi-card__value" id="totalProducts">8</div>
+            <div class="kpi-card__trend">Productos registrados</div>
+          </article>
+
+          <article class="kpi-card kpi-card--success">
+            <div class="kpi-card__top">
+              <span class="kpi-card__label">Unidades disponibles</span>
+              <span class="kpi-icon">✓</span>
+            </div>
+            <div class="kpi-card__value" id="totalUnits">190</div>
+            <div class="kpi-card__trend">Existencias actuales</div>
+          </article>
+
+          <article class="kpi-card kpi-card--warning">
+            <div class="kpi-card__top">
+              <span class="kpi-card__label">Stock bajo</span>
+              <span class="kpi-icon">!</span>
+            </div>
+            <div class="kpi-card__value" id="lowStock">2</div>
+            <div class="kpi-card__trend">Requieren atención</div>
+          </article>
+
+          <article class="kpi-card kpi-card--accent">
+            <div class="kpi-card__top">
+              <span class="kpi-card__label">Agotados</span>
+              <span class="kpi-icon">×</span>
+            </div>
+            <div class="kpi-card__value" id="outOfStock">1</div>
+            <div class="kpi-card__trend">Sin existencias</div>
+          </article>
+        </section>
+
+        <!-- Tabla de productos -->
+        <section class="inventory-panel" id="inventory">
+          <div class="inventory-panel__header">
+            <div>
+              <h2>Inventario de productos</h2>
+              <p>Consulta y administra los productos registrados.</p>
+            </div>
+            <span class="inventory-count" id="visibleCount">8 productos</span>
+          </div>
+
+          <div class="table-responsive">
+            <table class="table data-table align-middle mb-0">
+              <thead>
+                <tr>
+                  <th scope="col">Código</th>
+                  <th scope="col">Producto</th>
+                  <th scope="col" class="d-none d-md-table-cell">Categoría</th>
+                  <th scope="col">Cantidad</th>
+                  <th scope="col">Estado</th>
+                </tr>
+              </thead>
+
+              <!-- Productos registrados -->
+              <tbody id="productTable">
+                <tr data-name="Laptop Lenovo IdeaPad" data-category="Tecnología" data-stock="15">
+                  <td class="product-code">PR-001</td>
+                  <td><strong>Laptop Lenovo IdeaPad</strong><small>Equipo de cómputo</small></td>
+                  <td class="d-none d-md-table-cell">Tecnología</td>
+                  <td>15</td>
+                  <td><span class="status-badge status-badge--disponible">Disponible</span></td>
+                </tr>
+                <tr data-name="Mouse inalámbrico" data-category="Accesorios" data-stock="32">
+                  <td class="product-code">PR-002</td>
+                  <td><strong>Mouse inalámbrico</strong><small>Accesorio de computadora</small></td>
+                  <td class="d-none d-md-table-cell">Accesorios</td>
+                  <td>32</td>
+                  <td><span class="status-badge status-badge--disponible">Disponible</span></td>
+                </tr>
+                <tr data-name="Teclado mecánico" data-category="Accesorios" data-stock="5">
+                  <td class="product-code">PR-003</td>
+                  <td><strong>Teclado mecánico</strong><small>Teclado RGB</small></td>
+                  <td class="d-none d-md-table-cell">Accesorios</td>
+                  <td>5</td>
+                  <td><span class="status-badge status-badge--bajo">Stock bajo</span></td>
+                </tr>
+                <tr data-name="Monitor Samsung 24 pulgadas" data-category="Tecnología" data-stock="12">
+                  <td class="product-code">PR-004</td>
+                  <td><strong>Monitor Samsung 24"</strong><small>Monitor LED</small></td>
+                  <td class="d-none d-md-table-cell">Tecnología</td>
+                  <td>12</td>
+                  <td><span class="status-badge status-badge--disponible">Disponible</span></td>
+                </tr>
+                <tr data-name="Audífonos Bluetooth" data-category="Audio" data-stock="0">
+                  <td class="product-code">PR-005</td>
+                  <td><strong>Audífonos Bluetooth</strong><small>Audio inalámbrico</small></td>
+                  <td class="d-none d-md-table-cell">Audio</td>
+                  <td>0</td>
+                  <td><span class="status-badge status-badge--agotado">Agotado</span></td>
+                </tr>
+                <tr data-name="Memoria USB 64 GB" data-category="Almacenamiento" data-stock="45">
+                  <td class="product-code">PR-006</td>
+                  <td><strong>Memoria USB 64 GB</strong><small>Almacenamiento portátil</small></td>
+                  <td class="d-none d-md-table-cell">Almacenamiento</td>
+                  <td>45</td>
+                  <td><span class="status-badge status-badge--disponible">Disponible</span></td>
+                </tr>
+                <tr data-name="Disco SSD 1 TB" data-category="Almacenamiento" data-stock="3">
+                  <td class="product-code">PR-007</td>
+                  <td><strong>Disco SSD 1 TB</strong><small>Unidad de estado sólido</small></td>
+                  <td class="d-none d-md-table-cell">Almacenamiento</td>
+                  <td>3</td>
+                  <td><span class="status-badge status-badge--bajo">Stock bajo</span></td>
+                </tr>
+                <tr data-name="Webcam HD" data-category="Accesorios" data-stock="78">
+                  <td class="product-code">PR-008</td>
+                  <td><strong>Webcam HD</strong><small>Cámara para computadora</small></td>
+                  <td class="d-none d-md-table-cell">Accesorios</td>
+                  <td>78</td>
+                  <td><span class="status-badge status-badge--disponible">Disponible</span></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+
+          <!-- Mensaje cuando no hay resultados -->
+          <div class="empty-state d-none" id="emptyState">No se encontraron productos.</div>
+        </section>
+
+        <!-- Pie de página -->
+        <footer class="page-footer">
+          <span>© 2026 StockLab</span>
+          <span>Panel de gestión de inventario</span>
+        </footer>
+      </main>
+    </div>
+  </div>
+
+  <!-- Formulario para agregar productos -->
+  <div class="modal fade" id="productModal" tabindex="-1" aria-labelledby="productModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content">
+        <form id="productForm" class="needs-validation" novalidate>
+          <div class="modal-header">
+            <div>
+              <h2 class="modal-title fs-5" id="productModalLabel">Agregar producto</h2>
+              <p class="modal-subtitle mb-0">Completa la información del producto.</p>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Cerrar"></button>
+          </div>
+
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label" for="productName">Nombre del producto</label>
+              <input class="form-control" id="productName" name="productName" maxlength="80" required>
+              <div class="invalid-feedback">Escribe el nombre del producto.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="productCategory">Categoría</label>
+              <select class="form-select" id="productCategory" name="productCategory" required>
+                <option value="">Selecciona una categoría</option>
+                <option>Tecnología</option>
+                <option>Accesorios</option>
+                <option>Audio</option>
+                <option>Almacenamiento</option>
+                <option>Otros</option>
+              </select>
+              <div class="invalid-feedback">Selecciona una categoría.</div>
+            </div>
+
+            <div class="mb-3">
+              <label class="form-label" for="productStock">Cantidad en inventario</label>
+              <input class="form-control" id="productStock" name="productStock" type="number" min="0" max="99999" required>
+              <div class="invalid-feedback">Ingresa una cantidad válida.</div>
+            </div>
+          </div>
+
+          <div class="modal-footer">
+            <button type="button" class="btn btn-outline-secondary" data-bs-dismiss="modal">Cancelar</button>
+            <button type="submit" class="btn btn-primary">Guardar producto</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <!-- Notificaciones del sistema -->
+  <div class="toast-container position-fixed bottom-0 end-0 p-3">
+    <div id="appToast" class="toast" role="status" aria-live="polite" aria-atomic="true">
+      <div class="toast-header">
+        <span class="toast-indicator"></span>
+        <strong class="me-auto">StockLab</strong>
+        <small>Ahora</small>
+        <button type="button" class="btn-close" data-bs-dismiss="toast" aria-label="Cerrar"></button>
+      </div>
+      <div class="toast-body" id="toastMessage">Producto agregado correctamente.</div>
+    </div>
+  </div>
+
+  <!-- Archivo principal de JavaScript -->
+  <script type="module" src="/src/main.js"></script>
+</body>
 </html>
